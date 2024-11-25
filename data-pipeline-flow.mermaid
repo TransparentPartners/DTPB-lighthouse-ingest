@@ -1,0 +1,85 @@
+flowchart TD
+    Start([Start Pipeline]) --> CheckS3{Check S3 for\nExcel Files}
+    
+    %% Main Flow
+    CheckS3 -->|Files Found| ProcessLoop[Start Processing Loop]
+    CheckS3 -->|No Files| End([End Pipeline])
+    
+    ProcessLoop --> Download{Download\nExcel File}
+    
+    %% Download and Validation
+    Download -->|Success| ValidateExcel{Validate Excel\nFormat}
+    Download -->|Failure| LogError1[Log Error]
+    LogError1 --> NextFile
+    
+    ValidateExcel -->|Valid| ConvertCSV{Convert to CSV}
+    ValidateExcel -->|Invalid| LogError2[Log Error]
+    LogError2 --> NextFile
+    
+    %% CSV Processing
+    ConvertCSV -->|Success| UploadCSV{Upload CSV to\nIntermediate S3}
+    ConvertCSV -->|Failure| LogError3[Log Error]
+    LogError3 --> NextFile
+    
+    UploadCSV -->|Success| NormalizeCSV{Normalize CSV Data}
+    UploadCSV -->|Failure| LogError4[Log Error]
+    LogError4 --> NextFile
+    
+    %% Normalization Process
+    NormalizeCSV -->|Success| ValidateData{Validate Data\nTransformation}
+    NormalizeCSV -->|Failure| LogError5[Log Error]
+    LogError5 --> NextFile
+    
+    %% Data Validation
+    ValidateData -->|Valid| AddMetadata[Add Metadata Fields]
+    ValidateData -->|Invalid| LogError6[Log Error]
+    LogError6 --> NextFile
+    
+    AddMetadata --> UploadNormalized{Upload Normalized\nCSV to S3}
+    
+    %% Final Upload
+    UploadNormalized -->|Success| Cleanup[Cleanup Temp Files]
+    UploadNormalized -->|Failure| LogError7[Log Error]
+    LogError7 --> Cleanup
+    
+    %% Cleanup and Loop
+    Cleanup --> NextFile{More Files?}
+    NextFile -->|Yes| ProcessLoop
+    NextFile -->|No| CleanupTemp[Cleanup Temp Directory]
+    CleanupTemp --> End
+    
+    %% Subprocesses
+    subgraph Metadata Fields
+        AddMetadata --> |Add| AF1[file_name]
+        AddMetadata --> |Add| AF2[file_date]
+        AddMetadata --> |Add| AF3[date_created]
+        AddMetadata --> |Add| AF4[date_modified]
+    end
+    
+    subgraph Data Validation
+        ValidateData --> VD1[Check Dates]
+        ValidateData --> VD2[Verify Numbers]
+        ValidateData --> VD3[Check Nulls]
+        ValidateData --> VD4[Validate Percentages]
+    end
+    
+    %% Error Handling
+    subgraph Error Handling
+        LogError1 --> E1[Retry Count < 3]
+        LogError2 --> E2[Retry Count < 3]
+        LogError3 --> E3[Retry Count < 3]
+        E1 -->|Yes| Download
+        E2 -->|Yes| ValidateExcel
+        E3 -->|Yes| ConvertCSV
+    end
+    
+    %% Styling
+    classDef process fill:#e1f5fe,stroke:#01579b
+    classDef decision fill:#fff3e0,stroke:#ff6f00
+    classDef error fill:#ffebee,stroke:#c62828
+    classDef success fill:#e8f5e9,stroke:#2e7d32
+    
+    class Start,End success
+    class CheckS3,Download,ValidateExcel,ConvertCSV,UploadCSV,NormalizeCSV,ValidateData,UploadNormalized,NextFile decision
+    class LogError1,LogError2,LogError3,LogError4,LogError5,LogError6,LogError7 error
+    class ProcessLoop,Cleanup,CleanupTemp,AddMetadata process
