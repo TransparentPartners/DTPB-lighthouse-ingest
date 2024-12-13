@@ -215,11 +215,9 @@ For additional support:
 3. Commit changes
 4. Submit pull request
 
-## License
-[Specify License]
-
 ## Authors
-[Your Name/Organization]
+- John Lillard/Transparent Partners
+- Nitay Kenigsztein/Transparent Partners
 
 ## Acknowledgments
 - AWS SDK Documentation
@@ -227,4 +225,4 @@ For additional support:
 - Python Community Resources
 
 ## Project Status
-Active development - [Current Version]
+Active development - 1.1
