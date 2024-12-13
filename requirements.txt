@@ -1,0 +1,4 @@
+# Required packages
+pip install pandas==2.0.0
+pip install boto3==1.26.137
+pip install openpyxl==3.1.2
