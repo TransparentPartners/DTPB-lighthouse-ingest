@@ -59,59 +59,59 @@ aws configure
 ```
 
 ## Configuration
-1. Update `config.py` with your S3 bucket information:
+1. Update `air_dna_normalizer.py` with your S3 bucket information:
 ```python
 S3_CONFIG = {
     'region': 'us-east-1',
     'buckets': {
         'source': 'your-bucket-name',
         'paths': {
-            'excel': 'path/to/excel/files/',
-            'csv': 'path/to/csv/files/',
-            'normalized': 'path/to/normalized/files/'
+            'excel': 'airdna/source-airdna-for-{n}/',
+            'csv': 'airdna/csv-airdna-for-pbi-{n}',
+            'normalized': 'airdna/normalized-csv-airdna-for-pbi-{n}'
         }
     }
 }
 ```
 
-2. Adjust column mappings if needed in `config.py`
+2. Adjust column mappings if needed in `air_dna_normalizer.py`
 
 ## Usage
 1. Basic execution:
 ```bash
-python main.py
+python air_dna_normalizer.py
 ```
 
 2. With specific configuration file:
 ```bash
-python main.py --config custom_config.py
+python air_dna_normalizer.py --config
 ```
 
 3. Running with logging:
 ```bash
-python main.py --log-level DEBUG
+python air_dna_normalizer.py --log-level DEBUG
 ```
 
 ## Architecture
 The pipeline consists of four main components:
 
-1. **S3 Operations** (`s3_operations.py`)
+1. **S3 Operations** (`air_dna_separator.py`)
    - Handles all S3 interactions
    - File upload/download management
    - S3 listing and verification
 
-2. **Data Processor** (`data_processor.py`)
+2. **Data Processor** (`air_dna_normalizer.py`)
    - Excel to CSV conversion
    - Data normalization
    - Field standardization
    - Metadata management
 
-3. **Configuration** (`config.py`)
+3. **Configuration** (`air_dna_normalizer.py`)
    - S3 configuration
    - Column mappings
    - Processing rules
 
-4. **Main Process** (`main.py`)
+4. **Main Process** (`air_dna_normalizer.py`)
    - Pipeline orchestration
    - Error handling
    - Logging coordination
@@ -200,7 +200,7 @@ Solution: Adjust batch size in config.py
 ### Debug Mode
 Enable debug logging:
 ```bash
-python main.py --debug
+python air_dna_normalizer.py --debug
 ```
 
 ### Support
